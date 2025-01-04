@@ -8,8 +8,12 @@
 #ifndef __EARCLIPPINGTRIANGULATION_H__
 #define __EARCLIPPINGTRIANGULATION_H__
 
+#include <list>
 #include <vector>
 
+#include "Geometry.h"
+#include "monotoneSubdivision.h"
+#include "monotoneTriangulation.h"
 #include "Geometry.h"
 #include "Tools.h"
 
@@ -55,16 +59,55 @@ vector<Triangle> earClippingTriangulate(vector<Vertex> points) { // the ear clip
                         break;
                     }
                 }
-                if (flag) { // no point lies inseide triangle
-                    triangles.emplace_back(prev, points[i], next);
+                if (flag) { // no point lies inside triangle
+                    if(!(prev == points[i] || next == points[i] || prev == next)) {
+                        triangles.emplace_back(prev, points[i], next);
+                    }
                     points.erase(points.begin()+i);
                     infiniteLoop = false;
                 }
+
+                if (points.size() < 3) {
+                    if (points.size() > 0) {
+                        points.erase(points.begin()+i);
+                    }
+                    infiniteLoop = false;
+                }
+                
             }
         }
     }
 
     return triangles;
 }
+
+
+/**
+ * @brief The wrapper method to earClipping Triangulate a polygon
+ * 
+ * This function internally calls getMonotones() and earClippingTriangulate() 
+ * functions to get the triangulations
+ * 
+ * @param input List of Vertices of Polygons present in clockwise order
+ * @return vector<Triangle> List of Triangle objects representing the triangulation of polygon
+ */
+vector<Triangle> planeSweepEarClippingTriangulate(vector<Vertex> input) {
+    vector<Triangle> output;
+    list<vector<Vertex>> monotones = getMonotones(input);
+    // cout << "no of monotones: " << monotones.size() << "\n";
+    // for (auto &monotone: monotones) {
+    //     for (auto &x: monotone) {
+    //         cout << x << " ";
+    //     }cout << "\n";
+    // }
+    // exit(1);
+    for (auto &monotone: monotones) {
+        vector<Triangle> temp = earClippingTriangulate(monotone);
+        output.insert(output.end(), temp.begin(), temp.end());
+    }
+    return output;
+}
+
+
 
 #endif

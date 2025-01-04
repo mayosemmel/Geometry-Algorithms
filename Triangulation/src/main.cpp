@@ -34,7 +34,8 @@ int main(int argc, char *argv[]) {
 
     // perform triangulation with any of the below algorithms
     // vector<Triangle> output = earClippingTriangulate(input);
-    vector<Triangle> output = planeSweepTriangulate(input);
+    //vector<Triangle> output = planeSweepTriangulate(input);
+    vector<Triangle> output = earClippingTriangulate(input);
     auto lap2 = high_resolution_clock::now();
 
     // print output
